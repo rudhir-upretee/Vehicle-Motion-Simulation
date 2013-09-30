@@ -1,0 +1,40 @@
+This program is a simple implementation of three car following models - Optimal Control Model, IDM and Optimal Control With First Order Dynamics. It generates plots for the results obtained by using different parameters. Type help to get the list of parameters and usage information.
+
+./CarFollow_Git --help
+Usage: CarFollow_Git [OPTION...] DUMMY_ARG
+A program to simulate car following behavior in a single lane traffic.
+
+  -m, --model=INT            Car following model
+      --model=1              Simple Model
+      --model=2              Optimal Control Model
+      --model=3              First Order Optimal Control Model
+      --model=4              IDM
+  -n, --veh-cnt=INT          Number of vehicles in simulation
+  -i, --sim-time=DOUBLE      Duration of simulation in seconds
+  -c, --conn-pat=INT         Vehicle network connectivity pattern
+      --conn-pat=1           vehicles IN network followed by vehicles OUT of
+                             network
+      --conn-pat=2           vehicles OUT of network followed by vehicles IN
+                             network
+  -o, --pat-cnt=INT          Number of vehicles for network connectivity
+                             pattern
+      --pat-cnt=NUM          -n 100 -c 1 -o NUM means first NUM vehicles IN and
+                             remaining n-NUM OUT
+      --pat-cnt=NUM          -n 100 -c 2 -o NUM means first NUM vehicles OUT
+                             and remaining n-NUM IN
+  -s, --stat-cnt=INT         Vehicle interval count for calculating statistics
+      --stat-cnt=1           -s 1  means take statistics of all the vehicles
+      --stat-cnt=N           -s N  means take statistics of every Nth vehicle
+  -r, --react-time=DOUBLE    Reaction time delay in seconds.
+  -t, --tau-time=DOUBLE      First order response time constant in seconds.
+  -u, --update-time=DOUBLE   Simulation state update interval in seconds
+  -d, --nwDelta-time=DOUBLE  Network propagation delay in seconds
+  -w, --init-hdway-time=DOUBLE   Initial headway time in seconds
+  -x, --stable-hdway-time=DOUBLE   String stable headway time in seconds
+
+  -?, --help                 Give this help list
+      --usage                Give a short usage message
+
+Mandatory or optional arguments to long options are also mandatory or optional
+for any corresponding short options.
+
