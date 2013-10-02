@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cstdlib>
 #include "CFModel.h"
 #include "CFModelSimple.h"
@@ -16,15 +17,20 @@
 #include "CFModelFirstOrdOptCtrl.h"
 #include "CFModelIDM.h"
 #include "CFAPI.h"
+#include "CFStats.h"
 #include "Utils.h"
 #include "ArgParse.h"
 
 using namespace std;
 
+#if 0
 ofstream logDistTime;
 ofstream logVelTime;
-ofstream logParams;
 ofstream logRangeErrTime;
+ofstream logParams;
+#endif
+ostringstream paramsLogStr;
+
 
 // Globals
 static double INITIAL_INTERVEH_DIST = 0.0;
@@ -34,10 +40,12 @@ static double LEADER_CTRL_START = 0.0;
 static double LEADER_CTRL_DURATION = 0.0;
 static double LEADER_CRTL_DECELR = 0.0;
 
+#if 0
 void openLogFiles();
 void closeLogFiles();
 void logRangeError(double time, std::vector<Vehicle> vehList, int interval);
 void logCarVelocity(double time, std::vector<Vehicle> vehList, int interval);
+#endif
 void printUsage(char* inString);
 
 
@@ -165,14 +173,23 @@ int main(int argc, char* argv[]) {
 		return -1;
 		}
 
+	// Important classes
+	CFModel* cfModel;
+	CFStats cfStats;
+#if 0
 	openLogFiles();
 	logParams << "N=" << vehCnt
 			<< " T=" << simTime
 			<< " UpdT=" << updateTime
 			<< " RctT=" << reactTime
 			<< " DelT=" << nwDeltaTime;
+#endif
+	paramsLogStr << "N=" << vehCnt
+			<< " T=" << simTime
+			<< " UpdT=" << updateTime
+			<< " RctT=" << reactTime
+			<< " DelT=" << nwDeltaTime;
 
-	CFModel* cfModel;
 	if(model == SM)
 		{
 		double lamda = 0.3, m = 1.0, l = 1.0;
@@ -187,7 +204,12 @@ int main(int argc, char* argv[]) {
 
 		cfModel = new CFModelSimple(lamda, m, l);
 
+#if 0
 		logParams << " Lamda=" << lamda
+				<< " m=" << m
+				<< " l=" << l << endl;
+#endif
+		paramsLogStr << " Lamda=" << lamda
 				<< " m=" << m
 				<< " l=" << l << endl;
 		}
@@ -206,8 +228,13 @@ int main(int argc, char* argv[]) {
 
 		cfModel = new CFModelOptimalControl(k1, k2,
 											initHdwayTime, stableHdwayTime);
-
+#if 0
 		logParams << " k1=" << k1
+				<< " k2=" << k2
+				<< " hdwayT=" << initHdwayTime
+				<< " stblHdwayT=" << stableHdwayTime << endl;
+#endif
+		paramsLogStr << " k1=" << k1
 				<< " k2=" << k2
 				<< " hdwayT=" << initHdwayTime
 				<< " stblHdwayT=" << stableHdwayTime << endl;
@@ -230,6 +257,7 @@ int main(int argc, char* argv[]) {
 							updateTime, initHdwayTime, stableHdwayTime,
 							minGap, INITIAL_ACCELERATION);
 
+#if 0
 		logParams << " TauT=" << tauTime
 				<< " alpha=" << alpha
 				<< " k=" << k
@@ -237,8 +265,14 @@ int main(int argc, char* argv[]) {
 				<< " minGap=" << minGap
 				<< " hdwayT=" << initHdwayTime
 				<< " sHdwayT=" << stableHdwayTime << endl;
-
-
+#endif
+		paramsLogStr << " TauT=" << tauTime
+				<< " alpha=" << alpha
+				<< " k=" << k
+				<< " xi=" << xi
+				<< " minGap=" << minGap
+				<< " hdwayT=" << initHdwayTime
+				<< " sHdwayT=" << stableHdwayTime << endl;
 		}
 	else if(model == IDM)
 		{
@@ -256,24 +290,26 @@ int main(int argc, char* argv[]) {
 		cfModel = new CFModelIDM(desVel, initHdwayTime, stableHdwayTime,
 								minGap, maxAcclr, desDecelr);
 
+#if 0
 		logParams << " desVel=" << desVel
 				<< " desTgap=" << initHdwayTime
 				<< " minGap=" << minGap
 				<< " maxAcl=" << maxAcclr
 				<< " desDcl=" << desDecelr << endl;
+#endif
+		paramsLogStr << " desVel=" << desVel
+				<< " desTgap=" << initHdwayTime
+				<< " minGap=" << minGap
+				<< " maxAcl=" << maxAcclr
+				<< " desDcl=" << desDecelr << endl;
 		}
+	cfStats.logParams(paramsLogStr);
 
 	std::vector<Vehicle> vehList;
 
 	CFAPI cfApi(cfModel, updateTime, reactTime, nwDeltaTime,
 				INITIAL_INTERVEH_DIST, INITIAL_VELOCITY, INITIAL_ACCELERATION,
 				initHdwayTime);
-
-#if 0
-	cfApi.initCFModel(vehList, connPat, patCnt, vehCnt);
-	cfApi.initLeaderControl(LEADER_CTRL_START, LEADER_CTRL_DURATION,
-							LEADER_CRTL_DECELR);
-#endif
 
 	cfApi.initVehicles(vehList, vehCnt, connPat, patCnt,
 				LEADER_CTRL_START, LEADER_CTRL_DURATION, LEADER_CRTL_DECELR);
@@ -285,8 +321,8 @@ int main(int argc, char* argv[]) {
 		{
 		// Print statistics
 		cout << "Time " << currTime << endl;
-		logRangeError(currTime, vehList, statCnt);
-		logCarVelocity(currTime, vehList, statCnt);
+		cfStats.logRangeError(currTime, vehList, statCnt);
+		cfStats.logCarVelocity(currTime, vehList, statCnt);
 
 		// Acclr Response update
 		cfApi.updateAcclr(step, currTime);
@@ -305,10 +341,13 @@ int main(int argc, char* argv[]) {
 			vehCnt, statCnt, reactTime, updateTime, tauTime);
 	system(cmd);
 
+#if 0
 	closeLogFiles();
+#endif
 	return 0;
 }
 
+#if 0
 void openLogFiles()
 	{
 	if(!logParams.is_open())
@@ -386,6 +425,7 @@ void logCarVelocity(double time, std::vector<Vehicle> vehList, int interval)
 				   << std::endl;
 		}
 	}
+#endif
 
 void printUsage(char* inString)
 	{
