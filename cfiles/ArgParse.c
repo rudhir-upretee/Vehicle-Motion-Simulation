@@ -59,6 +59,8 @@ static struct argp_option options[] = {
 		{ "init-hdway-time", 'w', "DOUBLE", 0, "Initial headway time in seconds" },
 		{ 0, 0, 0, 0, "", 12},
 		{ "stable-hdway-time", 'x', "DOUBLE", 0, "String stable headway time in seconds" },
+		{ 0, 0, 0, 0, "", 13},
+		{ "perturb-start-time", 'p', "DOUBLE", 0, "Perturbation start time of leader in seconds" },
 		{ 0 } };
 
 /*
@@ -104,6 +106,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 		break;
 	case 'x':
 		arguments->stableHdwayTime = arg;
+		break;
+	case 'p':
+		arguments->perturbStartTime = arg;
 		break;
 	case ARGP_KEY_ARG:
 		if (state->arg_num >= 1) {
@@ -162,6 +167,7 @@ void argParse(int argc, char **argv, Arguments* arguments) {
 	arguments->nwDeltaTime = "0.1";
 	arguments->initHdwayTime = "1.0";
 	arguments->stableHdwayTime = "1.5";
+	arguments->perturbStartTime = "10.0";
 
 	/* Where the magic happens */
 	createOptDocs();
@@ -172,7 +178,8 @@ void argParse(int argc, char **argv, Arguments* arguments) {
 	printf("model = %s\nveh-cnt = %s\nsim-time = %s\n"
 			"conn-pat = %s\npat-cnt = %s\nstat-cnt = %s\n"
 			"react-time = %s\ntau-time = %s\nupdate-time = %s\n"
-			"nwDelta-time = %s\ninit-hdway-time = %s\nstable-hdway-time = %s\n",
+			"nwDelta-time = %s\ninit-hdway-time = %s\nstable-hdway-time = %s\n"
+			"perturb-start-time = %s\n",
 			arguments->model,
 			arguments->vehCnt,
 			arguments->simTime,
@@ -184,7 +191,8 @@ void argParse(int argc, char **argv, Arguments* arguments) {
 			arguments->updateTime,
 			arguments->nwDeltaTime,
 			arguments->initHdwayTime,
-			arguments->stableHdwayTime);
+			arguments->stableHdwayTime,
+			arguments->perturbStartTime);
 	printf("ARG1 = %s\n\n", arguments->args[0]);
 #endif
 }

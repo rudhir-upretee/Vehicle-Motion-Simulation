@@ -27,6 +27,7 @@ typedef struct Arguments {
 	char* nwDeltaTime;
 	char* initHdwayTime;
 	char* stableHdwayTime;
+	char* perturbStartTime;
 	char *args[1]; /* ARG1 */
 
 }Arguments;

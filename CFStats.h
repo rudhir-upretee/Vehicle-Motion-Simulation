@@ -18,7 +18,19 @@ using namespace std;
 
 class CFStats {
 public:
-	CFStats();
+	CFStats(int model,
+			int vehCnt,
+			double simTime,
+			int connPat,
+			int patCnt,
+			int statCnt,
+			double reactTime,
+			double tauTime,
+			double updateTime,
+			double nwDeltaTime,
+			double initHdwayTime,
+			double stableHdwayTime,
+			double perturbStartTime);
 	virtual ~CFStats();
 	void openLogFiles();
 	void closeLogFiles();
@@ -26,14 +38,36 @@ public:
 	void logVelTime(ostringstream& paramsLogStr);
 	void logRangeErrTime(ostringstream& paramsLogStr);
 	void logParams(ostringstream& paramsLogStr);
-	void logRangeError(double time, std::vector<Vehicle> vehList, int interval);
-	void logCarVelocity(double time, std::vector<Vehicle> vehList, int interval);
+	void logRangeError(double time, std::vector<Vehicle> vehList);
+	void logCarVelocity(double time, std::vector<Vehicle> vehList);
+	void initStatVectors();
+	void plotStats();
+	void plotMetrics();
 
 private:
+	int m_model;
+	int m_vehCnt;
+	double m_simTime;
+	int m_connPat;
+	int m_patCnt;
+	int m_statCnt;
+	double m_reactTime;
+	double m_tauTime;
+	double m_updateTime;
+	double m_nwDeltaTime;
+	double m_initHdwayTime;
+	double m_stableHdwayTime;
+	double m_perturbStartTime;
+
 	ofstream distTimeLog;
 	ofstream velTimeLog;
 	ofstream rangeErrTimeLog;
 	ofstream paramsLog;
+
+	std::vector<double> m_maxRangeErr;
+	std::vector<double> m_minInterVehGap;
+	std::vector<double> m_minTimeToCollide;
+
 };
 
 #endif /* CFSTATS_H_ */

@@ -23,31 +23,16 @@
 
 using namespace std;
 
-#if 0
-ofstream logDistTime;
-ofstream logVelTime;
-ofstream logRangeErrTime;
-ofstream logParams;
-#endif
 ostringstream paramsLogStr;
-
 
 // Globals
 static double INITIAL_INTERVEH_DIST = 0.0;
 static double INITIAL_VELOCITY = 0.0;
 static double INITIAL_ACCELERATION = 0.0;
-static double LEADER_CTRL_START = 0.0;
-static double LEADER_CTRL_DURATION = 0.0;
-static double LEADER_CRTL_DECELR = 0.0;
+static double perturbDuration = 5.0;
+static double perturbMagnitude = -2.0;
 
-#if 0
-void openLogFiles();
-void closeLogFiles();
-void logRangeError(double time, std::vector<Vehicle> vehList, int interval);
-void logCarVelocity(double time, std::vector<Vehicle> vehList, int interval);
-#endif
 void printUsage(char* inString);
-
 
 int main(int argc, char* argv[]) {
 
@@ -151,6 +136,14 @@ int main(int argc, char* argv[]) {
 		return -1;
 		}
 
+	double perturbStartTime = atof(arguments.perturbStartTime);
+	if(Utils::isLess(perturbStartTime, 0.0) || Utils::isEqual(perturbStartTime, 0.0))
+		{
+		cout << "ERROR: Invalid argument to perturb-start-time" << endl;
+		printUsage(argv[0]);
+		return -1;
+		}
+
 	cout << "model = " << model << endl
 			<< "vehCnt = " << vehCnt << endl
 			<< "simTime = " << simTime << endl
@@ -162,7 +155,8 @@ int main(int argc, char* argv[]) {
 			<< "updateTime = " << updateTime << endl
 			<< "nwDeltaTime = " << nwDeltaTime << endl
 			<< "initHdwayTime = " << initHdwayTime << endl
-			<< "stableHdwayTime = " << stableHdwayTime << endl;
+			<< "stableHdwayTime = " << stableHdwayTime << endl
+			<< "perturbStartTime = " << perturbStartTime << endl;
 
 	// Sanity check
 	if(updateTime > reactTime)
@@ -173,17 +167,23 @@ int main(int argc, char* argv[]) {
 		return -1;
 		}
 
-	// Important classes
+	// Initialize classes
+	CFStats cfStats(model,
+			vehCnt,
+			simTime,
+			connPat,
+			patCnt,
+			statCnt,
+			reactTime,
+			tauTime,
+			updateTime,
+			nwDeltaTime,
+			initHdwayTime,
+			stableHdwayTime,
+			perturbStartTime);
+
 	CFModel* cfModel;
-	CFStats cfStats;
-#if 0
-	openLogFiles();
-	logParams << "N=" << vehCnt
-			<< " T=" << simTime
-			<< " UpdT=" << updateTime
-			<< " RctT=" << reactTime
-			<< " DelT=" << nwDeltaTime;
-#endif
+
 	paramsLogStr << "N=" << vehCnt
 			<< " T=" << simTime
 			<< " UpdT=" << updateTime
@@ -198,20 +198,15 @@ int main(int argc, char* argv[]) {
 		INITIAL_VELOCITY = 30.0;
 		INITIAL_ACCELERATION = 0.0;
 
-		LEADER_CTRL_START = 4.0;
-		LEADER_CTRL_DURATION = 5.0;
-		LEADER_CRTL_DECELR = -2.0;
+		perturbDuration = 5.0;
+		perturbMagnitude = -2.0;
 
 		cfModel = new CFModelSimple(lamda, m, l);
 
-#if 0
-		logParams << " Lamda=" << lamda
-				<< " m=" << m
-				<< " l=" << l << endl;
-#endif
 		paramsLogStr << " Lamda=" << lamda
 				<< " m=" << m
-				<< " l=" << l << endl;
+				<< " l=" << l;
+		cfStats.logParams(paramsLogStr);
 		}
 	else if(model == OCM)
 		{
@@ -222,22 +217,17 @@ int main(int argc, char* argv[]) {
 		INITIAL_VELOCITY = 30.0;
 		INITIAL_ACCELERATION = 0.0;
 
-		LEADER_CTRL_START = 4.0;
-		LEADER_CTRL_DURATION = 5.0;
-		LEADER_CRTL_DECELR = -4.0;
+		perturbDuration = 5.0;
+		perturbMagnitude = -4.0;
 
 		cfModel = new CFModelOptimalControl(k1, k2,
 											initHdwayTime, stableHdwayTime);
-#if 0
-		logParams << " k1=" << k1
-				<< " k2=" << k2
-				<< " hdwayT=" << initHdwayTime
-				<< " stblHdwayT=" << stableHdwayTime << endl;
-#endif
+
 		paramsLogStr << " k1=" << k1
 				<< " k2=" << k2
 				<< " hdwayT=" << initHdwayTime
-				<< " stblHdwayT=" << stableHdwayTime << endl;
+				<< " stblHdwayT=" << stableHdwayTime;
+		cfStats.logParams(paramsLogStr);
 		}
 	else if(model == FOOCM)
 		{
@@ -246,33 +236,24 @@ int main(int argc, char* argv[]) {
 
 		// Works best tau = 0.2, updT = 0.1, reactT = 0.3, nwDlyT = 0.1
 		INITIAL_VELOCITY = 30.0;
-		INITIAL_INTERVEH_DIST = INITIAL_VELOCITY * initHdwayTime;
+    	INITIAL_INTERVEH_DIST = INITIAL_VELOCITY * initHdwayTime;
 		INITIAL_ACCELERATION = 0.0;
 
-		LEADER_CTRL_START = 10.0;
-		LEADER_CTRL_DURATION = 5.0;
-		LEADER_CRTL_DECELR = -2.0;
+		perturbDuration = 5.0;
+		perturbMagnitude = -2.0;
 
 		cfModel = new CFModelFirstOrdOptCtrl(alpha, k, xi, tauTime,
 							updateTime, initHdwayTime, stableHdwayTime,
 							minGap, INITIAL_ACCELERATION);
 
-#if 0
-		logParams << " TauT=" << tauTime
-				<< " alpha=" << alpha
-				<< " k=" << k
-				<< " xi=" << xi
-				<< " minGap=" << minGap
-				<< " hdwayT=" << initHdwayTime
-				<< " sHdwayT=" << stableHdwayTime << endl;
-#endif
 		paramsLogStr << " TauT=" << tauTime
 				<< " alpha=" << alpha
 				<< " k=" << k
 				<< " xi=" << xi
 				<< " minGap=" << minGap
 				<< " hdwayT=" << initHdwayTime
-				<< " sHdwayT=" << stableHdwayTime << endl;
+				<< " sHdwayT=" << stableHdwayTime;
+		cfStats.logParams(paramsLogStr);
 		}
 	else if(model == IDM)
 		{
@@ -283,27 +264,19 @@ int main(int argc, char* argv[]) {
 		INITIAL_VELOCITY = 30.0;
 		INITIAL_ACCELERATION = 0.0;
 
-		LEADER_CTRL_START = 4.0;
-		LEADER_CTRL_DURATION = 5.0;
-		LEADER_CRTL_DECELR = -4.0;
+		perturbDuration = 5.0;
+		perturbMagnitude = -4.0;
 
 		cfModel = new CFModelIDM(desVel, initHdwayTime, stableHdwayTime,
 								minGap, maxAcclr, desDecelr);
 
-#if 0
-		logParams << " desVel=" << desVel
-				<< " desTgap=" << initHdwayTime
-				<< " minGap=" << minGap
-				<< " maxAcl=" << maxAcclr
-				<< " desDcl=" << desDecelr << endl;
-#endif
 		paramsLogStr << " desVel=" << desVel
 				<< " desTgap=" << initHdwayTime
 				<< " minGap=" << minGap
 				<< " maxAcl=" << maxAcclr
-				<< " desDcl=" << desDecelr << endl;
+				<< " desDcl=" << desDecelr;
+		cfStats.logParams(paramsLogStr);
 		}
-	cfStats.logParams(paramsLogStr);
 
 	std::vector<Vehicle> vehList;
 
@@ -312,7 +285,7 @@ int main(int argc, char* argv[]) {
 				initHdwayTime);
 
 	cfApi.initVehicles(vehList, vehCnt, connPat, patCnt,
-				LEADER_CTRL_START, LEADER_CTRL_DURATION, LEADER_CRTL_DECELR);
+			perturbStartTime, perturbDuration, perturbMagnitude);
 
 	// Main Loop
 	double currTime = 0.0;
@@ -321,8 +294,8 @@ int main(int argc, char* argv[]) {
 		{
 		// Print statistics
 		cout << "Time " << currTime << endl;
-		cfStats.logRangeError(currTime, vehList, statCnt);
-		cfStats.logCarVelocity(currTime, vehList, statCnt);
+		cfStats.logRangeError(currTime, vehList);
+		cfStats.logCarVelocity(currTime, vehList);
 
 		// Acclr Response update
 		cfApi.updateAcclr(step, currTime);
@@ -334,98 +307,11 @@ int main(int argc, char* argv[]) {
 	// Generating plots
 	cout << endl;
 	cout << "Running script ..." << endl;
-	cout.flush();
-	char cmd[500];
-	sprintf(cmd,
-			"/home/rudhir/Research/CarFollow/src/plotscript/Plot.sh %d %d %f %f %f",
-			vehCnt, statCnt, reactTime, updateTime, tauTime);
-	system(cmd);
+    cfStats.plotStats();
+	cfStats.plotMetrics();
 
-#if 0
-	closeLogFiles();
-#endif
 	return 0;
 }
-
-#if 0
-void openLogFiles()
-	{
-	if(!logParams.is_open())
-		{
-		logParams.open("params.log");
-		}
-	if(!logDistTime.is_open())
-		{
-		logDistTime.open("distTime.log");
-		}
-	if(!logRangeErrTime.is_open())
-		{
-		logRangeErrTime.open("rangeErrTime.log");
-		}
-	if(!logVelTime.is_open())
-		{
-		logVelTime.open("velTime.log");
-		}
-
-	}
-
-void closeLogFiles()
-	{
-	if(logParams.is_open())
-		{
-		logParams.close();
-		}
-	if(logDistTime.is_open())
-		{
-		logDistTime.close();
-		}
-	if(logRangeErrTime.is_open())
-		{
-		logRangeErrTime.close();
-		}
-	if(logVelTime.is_open())
-		{
-		logVelTime.close();
-		}
-
-	}
-
-void logRangeError(double time, std::vector<Vehicle> vehList, int interval)
-	{
-	for(unsigned int i = 0; i+1 < vehList.size(); i+=interval)
-		{
-		//
-		// Log Inter car gap
-		logDistTime << time << ":"
-				    << vehList.at(i).getPosX() - vehList.at(i+1).getPosX()
-				    << std::endl;
-
-		//
-		// Log range error
-		double actualGap =
-				vehList.at(i).getPosX() - vehList.at(i+1).getPosX();
-		double desiredGap =
-				vehList.at(i+1).getHdwayTime() * vehList.at(i+1).getVel();
-
-		double rangeErr = actualGap - desiredGap;
-		logRangeErrTime << time << ":"
-						<< rangeErr
-						<< std::endl;
-		}
-	}
-
-void logCarVelocity(double time, std::vector<Vehicle> vehList, int interval)
-	{
-	for(unsigned int i = 0; i < vehList.size(); i+=interval)
-		{
-		logVelTime << time << ":"
-				   << vehList.at(i).getVel() << ":"
-				   << vehList.at(i).getPosX()  << ":"
-				   << vehList.at(i).getAcclr()
-				   << std::endl;
-		}
-	}
-#endif
 
 void printUsage(char* inString)
 	{

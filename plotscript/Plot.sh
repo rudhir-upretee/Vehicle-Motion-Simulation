@@ -6,7 +6,7 @@ vehSampleInt=$2
 reactT=$3
 updateT=$4
 tauT=$5
-echo "Arg: ${vehSampleInt} ${numVehicles}"
+echo "Arg: ${numVehicles} ${vehSampleInt} ${reactT} ${updateT} ${tauT}"
 numVehicles=$((numVehicles/vehSampleInt))
 
 # Save the present Dir path
@@ -48,13 +48,14 @@ echo "set terminal pdf" >> $distTimePlt
 echo "set output '$distTimePdf'" >> $distTimePlt
 echo "set title 'Inter Vehicular Gap Profile'" >> $distTimePlt
 echo "set grid" >> $distTimePlt
-echo "set xtics font \"Times-Roman, 4\"" >> $distTimePlt
-echo "set ytics font \"Times-Roman, 4\"" >> $distTimePlt
-echo "set xtics 10" >> $distTimePlt
+echo "set mxtics" >> $distTimePlt
+#echo "set xtics font \"Times-Roman, 4\"" >> $distTimePlt
+#echo "set ytics font \"Times-Roman, 4\"" >> $distTimePlt
+#echo "set xtics 10" >> $distTimePlt
 echo "set xlabel 'Time (seconds)'" >> $distTimePlt
 echo "set ylabel 'Inter Vehicular Gap (meters)'" >> $distTimePlt
 echo "set label \"$simParams\" at 1.5,48.0 tc rgb \"black\" font \",4\" front" >> $distTimePlt
-echo "set yrange [0:100]" >> $distTimePlt
+#echo "set yrange [0:100]" >> $distTimePlt
 echo "unset key" >> $distTimePlt
 firstLine="plot "
 if (( vehSampleInt>1 )) 
@@ -96,13 +97,14 @@ echo "set terminal pdf" >> $velTimePlt
 echo "set output '$velTimePdf'" >> $velTimePlt
 echo "set title 'Velocity Profile'" >> $velTimePlt
 echo "set grid" >> $velTimePlt
-echo "set xtics font \"Times-Roman, 4\"" >> $velTimePlt
-echo "set ytics font \"Times-Roman, 4\"" >> $velTimePlt
-echo "set xtics 10" >> $velTimePlt
+echo "set mxtics" >> $velTimePlt
+#echo "set xtics font \"Times-Roman, 4\"" >> $velTimePlt
+#echo "set ytics font \"Times-Roman, 4\"" >> $velTimePlt
+#echo "set xtics 10" >> $velTimePlt
 echo "set xlabel 'Time (seconds)'" >> $velTimePlt
 echo "set ylabel 'Velocity (meters/sec)'" >> $velTimePlt
 echo "set label \"$simParams\" at 1.5,38.0 tc rgb \"black\" font \",4\" front" >> $velTimePlt
-echo "set yrange [-10:40]" >> $velTimePlt
+#echo "set yrange [-10:40]" >> $velTimePlt
 echo "unset key" >> $velTimePlt
 firstLine="plot "
 for (( i=0; i<numVehicles-1; i++ ))
@@ -120,27 +122,6 @@ do
 done
 
 ###############################################################################
-## Generate GNUPlot script for AcclrVar.pdf
-###############################################################################
-#echo "Generating script $acclrVarPlt"
-#echo "set terminal pdf" >> $acclrVarPlt
-#echo "set output '$acclrVarPdf'" >> $acclrVarPlt
-#echo "set title 'Acclr Variance With Time'" >> $acclrVarPlt
-#echo "set grid" >> $acclrVarPlt
-#echo "set xtics font \"Times-Roman, 4\"" >> $acclrVarPlt
-#echo "set ytics font \"Times-Roman, 4\"" >> $acclrVarPlt
-#echo "set xtics 10" >> $acclrVarPlt
-#echo "set xlabel 'Time (seconds)'" >> $acclrVarPlt
-#echo "set ylabel 'Accleration Variance (meters/sec2)2'" >> $acclrVarPlt
-#echo "set label \"$simParams\" at 1.5,38.0 tc rgb \"black\" font \",4\" front" >> $acclrVarPlt
-#echo "set yrange [-4:40]" >> $acclrVarPlt
-#echo "unset key" >> $acclrVarPlt
-#echo "plot '-' with lines" >> $acclrVarPlt
-#echo >> $acclrVarPlt
-#./CalcVariance.awk vehCnt=$numVehicles $velTimeLog >> $acclrVarPlt
-#echo "e" >> $acclrVarPlt
-
-###############################################################################
 # Generate GNUPlot script for RangeErrTime.pdf
 ###############################################################################
 echo "Generating script $rangeErrTimePlt"
@@ -148,13 +129,14 @@ echo "set terminal pdf" >> $rangeErrTimePlt
 echo "set output '$rangeErrTimePdf'" >> $rangeErrTimePlt
 echo "set title 'Range Error Profile'" >> $rangeErrTimePlt
 echo "set grid" >> $rangeErrTimePlt
-echo "set xtics font \"Times-Roman, 4\"" >> $rangeErrTimePlt
-echo "set ytics font \"Times-Roman, 4\"" >> $rangeErrTimePlt
-echo "set xtics 10" >> $rangeErrTimePlt
+echo "set mxtics" >> $rangeErrTimePlt
+#echo "set xtics font \"Times-Roman, 4\"" >> $rangeErrTimePlt
+#echo "set ytics font \"Times-Roman, 4\"" >> $rangeErrTimePlt
+#echo "set xtics 10" >> $rangeErrTimePlt
 echo "set xlabel 'Time (seconds)'" >> $rangeErrTimePlt
 echo "set ylabel 'Range Error (meters)'" >> $rangeErrTimePlt
 echo "set label \"$simParams\" at 1.5,9.0 tc rgb \"black\" font \",4\" front" >> $rangeErrTimePlt
-echo "set yrange [-10:10]" >> $rangeErrTimePlt
+#echo "set yrange [-10:10]" >> $rangeErrTimePlt
 echo "unset key" >> $rangeErrTimePlt
 firstLine="plot "
 if (( vehSampleInt>1 )) 
