@@ -23,7 +23,8 @@ CFStats::CFStats(int model,
 		double nwDeltaTime,
 		double initHdwayTime,
 		double stableHdwayTime,
-		double perturbStartTime)
+		double perturbStartTime,
+		double minGap)
 	{
 	m_model = model;
 	m_vehCnt = vehCnt;
@@ -38,6 +39,7 @@ CFStats::CFStats(int model,
 	m_initHdwayTime = initHdwayTime;
 	m_stableHdwayTime = stableHdwayTime;
 	m_perturbStartTime = perturbStartTime;
+	m_minGap = minGap;
 
 	openLogFiles();
 	initStatVectors();
@@ -143,11 +145,30 @@ void CFStats::logRangeError(double time, std::vector<Vehicle> vehList)
 				{
 				m_minInterVehGap.at(i) = actualGap;
 				}
+
 			// Find running max of absolute range error
-			double absRangeErr = abs(rangeErr);
+#if 0
+			double absRangeErr = abs(rangeErr - m_minGap);
 			if(Utils::isGreater(absRangeErr,  m_maxRangeErr.at(i)))
 				{
 				m_maxRangeErr.at(i) = absRangeErr;
+				}
+#endif
+			if(Utils::isLess(rangeErr,  m_minGap) ||
+				Utils::isEqual(rangeErr,  m_minGap))
+				{
+				double deviation = m_minGap - rangeErr;
+				if(Utils::isGreater(deviation,  m_maxRangeErr.at(i)))
+					{
+					m_maxRangeErr.at(i) = deviation;
+					}
+				}
+
+			// Find running min of time to collide
+			double timeToCol = actualGap/(vehList.at(vehId+1).getVel());
+			if(Utils::isLess(timeToCol,  m_minTimeToCol.at(i)))
+				{
+				m_minTimeToCol.at(i) = timeToCol;
 				}
 			}
 		}
@@ -175,7 +196,7 @@ void CFStats::initStatVectors()
 		{
 		m_maxRangeErr.push_back(-100000);
 		m_minInterVehGap.push_back(100000);
-		m_minTimeToCollide.push_back(100000);
+		m_minTimeToCol.push_back(100000);
 		}
 	}
 
@@ -197,6 +218,7 @@ void CFStats::plotMetrics()
 	// Dump the min and max metrics to file
 	ofstream maxRngErrLog;
 	ofstream minInterVehGapLog;
+	ofstream minTimeToColLog;
 
 	// Open files
 	if(!maxRngErrLog.is_open())
@@ -206,6 +228,10 @@ void CFStats::plotMetrics()
 	if(!minInterVehGapLog.is_open())
 		{
 		minInterVehGapLog.open("minInterVehGap.log");
+		}
+	if(!minTimeToColLog.is_open())
+		{
+		minTimeToColLog.open("minTimeToCol.log");
 		}
 
 	// Write to files
@@ -217,6 +243,7 @@ void CFStats::plotMetrics()
 		{
 		maxRngErrLog << i << " " << m_maxRangeErr.at(i) << std::endl;
 		minInterVehGapLog << i << " " << m_minInterVehGap.at(i) << std::endl;
+		minTimeToColLog << i << " " << m_minTimeToCol.at(i) << std::endl;
 		}
 
 	// Close files
@@ -227,6 +254,10 @@ void CFStats::plotMetrics()
 	if(minInterVehGapLog.is_open())
 		{
 		minInterVehGapLog.close();
+		}
+	if(minInterVehGapLog.is_open())
+		{
+		minTimeToColLog.close();
 		}
 
 	ostringstream plotCmdStr;
@@ -240,3 +271,7 @@ void CFStats::plotMetrics()
 	system(str.c_str());
 	}
 
+void CFStats::setMinGap(double minGap)
+	{
+	m_minGap = minGap;
+	}

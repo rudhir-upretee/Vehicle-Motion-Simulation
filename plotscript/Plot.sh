@@ -55,7 +55,7 @@ echo "set mxtics" >> $distTimePlt
 echo "set xlabel 'Time (seconds)'" >> $distTimePlt
 echo "set ylabel 'Inter Vehicular Gap (meters)'" >> $distTimePlt
 echo "set label \"$simParams\" at 1.5,48.0 tc rgb \"black\" font \",4\" front" >> $distTimePlt
-#echo "set yrange [0:100]" >> $distTimePlt
+echo "set yrange [-10:80]" >> $distTimePlt
 echo "unset key" >> $distTimePlt
 firstLine="plot "
 if (( vehSampleInt>1 )) 
@@ -104,7 +104,7 @@ echo "set mxtics" >> $velTimePlt
 echo "set xlabel 'Time (seconds)'" >> $velTimePlt
 echo "set ylabel 'Velocity (meters/sec)'" >> $velTimePlt
 echo "set label \"$simParams\" at 1.5,38.0 tc rgb \"black\" font \",4\" front" >> $velTimePlt
-#echo "set yrange [-10:40]" >> $velTimePlt
+echo "set yrange [-10:80]" >> $velTimePlt
 echo "unset key" >> $velTimePlt
 firstLine="plot "
 for (( i=0; i<numVehicles-1; i++ ))
@@ -135,7 +135,7 @@ echo "set mxtics" >> $rangeErrTimePlt
 #echo "set xtics 10" >> $rangeErrTimePlt
 echo "set xlabel 'Time (seconds)'" >> $rangeErrTimePlt
 echo "set ylabel 'Range Error (meters)'" >> $rangeErrTimePlt
-echo "set label \"$simParams\" at 1.5,9.0 tc rgb \"black\" font \",4\" front" >> $rangeErrTimePlt
+echo "set label \"$simParams\" at graph 0.03, graph 0.03 tc rgb \"black\" font \",4\" front" >> $rangeErrTimePlt
 #echo "set yrange [-10:10]" >> $rangeErrTimePlt
 echo "unset key" >> $rangeErrTimePlt
 firstLine="plot "

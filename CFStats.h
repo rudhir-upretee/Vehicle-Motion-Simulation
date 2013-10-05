@@ -30,7 +30,8 @@ public:
 			double nwDeltaTime,
 			double initHdwayTime,
 			double stableHdwayTime,
-			double perturbStartTime);
+			double perturbStartTime,
+			double minGap);
 	virtual ~CFStats();
 	void openLogFiles();
 	void closeLogFiles();
@@ -43,6 +44,7 @@ public:
 	void initStatVectors();
 	void plotStats();
 	void plotMetrics();
+	void setMinGap(double minGap);
 
 private:
 	int m_model;
@@ -58,6 +60,7 @@ private:
 	double m_initHdwayTime;
 	double m_stableHdwayTime;
 	double m_perturbStartTime;
+	double m_minGap;
 
 	ofstream distTimeLog;
 	ofstream velTimeLog;
@@ -66,7 +69,7 @@ private:
 
 	std::vector<double> m_maxRangeErr;
 	std::vector<double> m_minInterVehGap;
-	std::vector<double> m_minTimeToCollide;
+	std::vector<double> m_minTimeToCol;
 
 };
 

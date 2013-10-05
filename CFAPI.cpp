@@ -184,6 +184,7 @@ std::vector<Vehicle> CFAPI::updateState(int step, double time) {
 
 		double nextPosX = s_init + (u * t) + (0.5 * a * pow(t, 2.0));
 		double nextVel  = std::max(0.0, u + a * t);
+		//double nextVel  = u + a * t;
 
 		nextStateVehList.at(i).setPosX(nextPosX);
 		nextStateVehList.at(i).setVel(nextVel);

@@ -18,16 +18,20 @@ cd $plotScriptDir
 # Output script file names
 maxRngErrPlt="$plotsOutDir/""MaxRngErrScript_""r$reactT""u$updateT""t$tauT.plt"
 minInterVehGapPlt="$plotsOutDir/""MinInterVehGapScript_""r$reactT""u$updateT""t$tauT.plt"
+minTimeToColPlt="$plotsOutDir/""MinTimeToColScript_""r$reactT""u$updateT""t$tauT.plt"
 > $maxRngErrPlt
 > $minInterVehGapPlt
+> $minTimeToColPlt
 
 # Output pdf file names
 maxRngErrPdf="$plotsOutDir/""MaxRngErr_""r$reactT""u$updateT""t$tauT.pdf"
 minInterVehGapPdf="$plotsOutDir/""MinInterVehGap_""r$reactT""u$updateT""t$tauT.pdf"
+minTimeToColPdf="$plotsOutDir/""MinTimeToCol_""r$reactT""u$updateT""t$tauT.pdf"
 
 # Log file names
 maxRngErrLog="/home/rudhir/workspace/CarFollow_Git/Debug/maxRngErr.log"
 minInterVehGapLog="/home/rudhir/workspace/CarFollow_Git/Debug/minInterVehGap.log"
+minTimeToColLog="/home/rudhir/workspace/CarFollow_Git/Debug/minTimeToCol.log"
 paramsLog="/home/rudhir/workspace/CarFollow_Git/Debug/params.log"
 
 # Capture simulation params
@@ -76,12 +80,35 @@ cat $minInterVehGapLog >> $minInterVehGapPlt
 echo "e" >> $minInterVehGapPlt
 
 ###############################################################################
+## Generate GNUPlot script for MinTimeToCol.pdf
+###############################################################################
+echo "Generating script $minTimeToColPlt"
+echo "set terminal pdf" >> $minTimeToColPlt
+echo "set output '$minTimeToColPdf'" >> $minTimeToColPlt
+echo "set title 'Min Time To Collide'" >> $minTimeToColPlt
+echo "set grid" >> $minTimeToColPlt
+#echo "set xtics font \"Times-Roman, 4\"" >> $minTimeToColPlt
+#echo "set ytics font \"Times-Roman, 4\"" >> $minTimeToColPlt
+#echo "set xtics 10" >> $minTimeToColPlt
+echo "set xlabel 'Vehicle Pairs'" >> $minTimeToColPlt
+echo "set ylabel 'Min Time To Collide (seconds)'" >> $minTimeToColPlt
+echo "set label \"$simParams\" at 1.5,48.0 tc rgb \"black\" font \",4\" front" >> $minTimeToColPlt
+#echo "set yrange [0:100]" >> $minTimeToColPlt
+echo "unset key" >> $minTimeToColPlt
+echo "plot '-'  with linespoints" >> $minTimeToColPlt
+echo >> $minTimeToColPlt 
+cat $minTimeToColLog >> $minTimeToColPlt
+echo "e" >> $minTimeToColPlt
+
+###############################################################################
 # Generate PDF
 ###############################################################################
 echo "Generating Pdf $maxRngErrPdf"
 gnuplot $maxRngErrPlt
 echo "Generating Pdf $minInterVehGapPdf"
 gnuplot $minInterVehGapPlt
+echo "Generating Pdf $minTimeToColPdf"
+gnuplot $minTimeToColPlt
 
 # Return to the saved dir path
 #cd $presentDir

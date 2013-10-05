@@ -180,7 +180,8 @@ int main(int argc, char* argv[]) {
 			nwDeltaTime,
 			initHdwayTime,
 			stableHdwayTime,
-			perturbStartTime);
+			perturbStartTime,
+			4.0);
 
 	CFModel* cfModel;
 
@@ -233,14 +234,15 @@ int main(int argc, char* argv[]) {
 		{
 		double alpha = 2, k = 1, xi = 0.6;
 		double minGap = 4.0;
+		cfStats.setMinGap(minGap);
 
 		// Works best tau = 0.2, updT = 0.1, reactT = 0.3, nwDlyT = 0.1
 		INITIAL_VELOCITY = 30.0;
-    	INITIAL_INTERVEH_DIST = INITIAL_VELOCITY * initHdwayTime;
+    	INITIAL_INTERVEH_DIST = INITIAL_VELOCITY * initHdwayTime + minGap;
 		INITIAL_ACCELERATION = 0.0;
 
 		perturbDuration = 5.0;
-		perturbMagnitude = -2.0;
+		perturbMagnitude = -4.0;
 
 		cfModel = new CFModelFirstOrdOptCtrl(alpha, k, xi, tauTime,
 							updateTime, initHdwayTime, stableHdwayTime,
@@ -258,6 +260,7 @@ int main(int argc, char* argv[]) {
 	else if(model == IDM)
 		{
 		double desVel = 30.0, minGap = 2.0, maxAcclr = 1.0, desDecelr = 3.0;
+		cfStats.setMinGap(minGap);
 
 		// Works with hdway=1.25 and stableHdway=2.0
 		INITIAL_INTERVEH_DIST = 34.0;
