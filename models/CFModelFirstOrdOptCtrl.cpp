@@ -4,8 +4,9 @@
  *  Created on: May 22, 2013
  *      Author: rudhir
  */
-
+#include <iostream>
 #include <cmath>
+#include <Utils.h>
 #include "CFModelFirstOrdOptCtrl.h"
 
 CFModelFirstOrdOptCtrl::CFModelFirstOrdOptCtrl(
@@ -57,14 +58,31 @@ double CFModelFirstOrdOptCtrl::getAcclrResponseInNetwork(double time,
 	double interVehDist = pred.getPosX() -  veh.getPosX();
 	double velDiff = pred.getVel() - veh.getVel();
 
+#if 1
 #if 0
+	double desiredGap =
+			veh.getHdwayTime() * veh.getVel();
+	double rangeErr = interVehDist - desiredGap;
+
+	double deviation = 0.0;
+	if(Utils::isLess(rangeErr,  m_minGap) ||
+		Utils::isEqual(rangeErr,  m_minGap))
+		{
+		deviation = m_minGap - rangeErr;
+		}
+
 	double dynHeadwayTime = m_initHeadwayTime +
-							(m_initHeadwayTime/(interVehDist/velVeh));
+							deviation/velVeh;
+#endif
+	double dynHeadwayTime = m_initHeadwayTime +
+							(interVehDist/velVeh)/m_initHeadwayTime;
 	hdwayTimeUsed = dynHeadwayTime;
+	std::cout << "dynHdway " << dynHeadwayTime << std::endl;
 
 	double inputFunc = (m_alpha * (((interVehDist - m_minGap)/dynHeadwayTime) - velVeh))
 					+ (m_k * velDiff)
 					- (m_xi * acclrVeh);
+
 #else
 	hdwayTimeUsed = m_strStblHeadwayTime;
 	double inputFunc = (m_alpha * (((interVehDist - m_minGap)/m_strStblHeadwayTime) - velVeh))

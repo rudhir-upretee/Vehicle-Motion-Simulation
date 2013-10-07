@@ -128,8 +128,9 @@ int main(int argc, char* argv[]) {
 		}
 
 	double stableHdwayTime = atof(arguments.stableHdwayTime);
-	if(Utils::isLess(stableHdwayTime, 0.0) || Utils::isEqual(stableHdwayTime, 0.0)
-		|| (Utils::isLess(stableHdwayTime, initHdwayTime)))
+	//if(Utils::isLess(stableHdwayTime, 0.0) || Utils::isEqual(stableHdwayTime, 0.0)
+	//	|| (Utils::isLess(stableHdwayTime, initHdwayTime)))
+	if(Utils::isLess(stableHdwayTime, 0.0) || Utils::isEqual(stableHdwayTime, 0.0))
 		{
 		cout << "ERROR: Invalid argument to stable-hdway-time" << endl;
 		printUsage(argv[0]);

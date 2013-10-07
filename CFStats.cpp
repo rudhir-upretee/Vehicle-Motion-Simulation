@@ -147,13 +147,6 @@ void CFStats::logRangeError(double time, std::vector<Vehicle> vehList)
 				}
 
 			// Find running max of absolute range error
-#if 0
-			double absRangeErr = abs(rangeErr - m_minGap);
-			if(Utils::isGreater(absRangeErr,  m_maxRangeErr.at(i)))
-				{
-				m_maxRangeErr.at(i) = absRangeErr;
-				}
-#endif
 			if(Utils::isLess(rangeErr,  m_minGap) ||
 				Utils::isEqual(rangeErr,  m_minGap))
 				{
