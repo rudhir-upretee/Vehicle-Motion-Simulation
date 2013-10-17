@@ -36,6 +36,8 @@ distTimeLog="/home/rudhir/workspace/CarFollow_Git/Debug/distTime.log"
 velTimeLog="/home/rudhir/workspace/CarFollow_Git/Debug/velTime.log" 
 paramsLog="/home/rudhir/workspace/CarFollow_Git/Debug/params.log"
 rangeErrTimeLog="/home/rudhir/workspace/CarFollow_Git/Debug/rangeErrTime.log"
+tmpLog="/home/rudhir/workspace/CarFollow_Git/Debug/temp.log"
+> $tmpLog
 
 # Capture simulation params
 simParams="`cat $paramsLog`"
@@ -55,7 +57,7 @@ echo "set mxtics" >> $distTimePlt
 echo "set xlabel 'Time (seconds)'" >> $distTimePlt
 echo "set ylabel 'Inter Vehicular Gap (meters)'" >> $distTimePlt
 echo "set label \"$simParams\" at 1.5,48.0 tc rgb \"black\" font \",4\" front" >> $distTimePlt
-echo "set yrange [-10:80]" >> $distTimePlt
+#echo "set yrange [-10:80]" >> $distTimePlt
 echo "unset key" >> $distTimePlt
 firstLine="plot "
 if (( vehSampleInt>1 )) 
@@ -70,7 +72,8 @@ then
 	for (( i=1; i<=numVehicles; i++ ))
 	do
 		echo >> $distTimePlt
-		./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $distTimeLog >> $distTimePlt
+		./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $distTimeLog > $tmpLog
+		awk 'BEGIN{FS=":"}{print $1,$2}' $tmpLog >> $distTimePlt
 		echo "e" >> $distTimePlt
 	done
 else
@@ -84,7 +87,8 @@ else
 	for (( i=1; i<=numVehicles-1; i++ ))
 	do
 		echo >> $distTimePlt
-		./GroupVehicle.awk lineStart=$i vehCnt=$((numVehicles-1)) $distTimeLog >> $distTimePlt
+		./GroupVehicle.awk lineStart=$i vehCnt=$((numVehicles-1)) $distTimeLog > $tmpLog
+                awk 'BEGIN{FS=":"}{print $1,$2}' $tmpLog >> $distTimePlt
 		echo "e" >> $distTimePlt
 	done
 fi
@@ -104,7 +108,7 @@ echo "set mxtics" >> $velTimePlt
 echo "set xlabel 'Time (seconds)'" >> $velTimePlt
 echo "set ylabel 'Velocity (meters/sec)'" >> $velTimePlt
 echo "set label \"$simParams\" at 1.5,38.0 tc rgb \"black\" font \",4\" front" >> $velTimePlt
-echo "set yrange [-10:80]" >> $velTimePlt
+#echo "set yrange [-10:80]" >> $velTimePlt
 echo "unset key" >> $velTimePlt
 firstLine="plot "
 for (( i=0; i<numVehicles-1; i++ ))
@@ -117,7 +121,8 @@ echo "'-'  with lines" >> $velTimePlt
 for (( i=1; i<=numVehicles; i++ ))
 do
 	echo >> $velTimePlt
-	./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $velTimeLog >> $velTimePlt
+	./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $velTimeLog > $tmpLog 
+	awk 'BEGIN{FS=":"}{print $1,$2}' $tmpLog >> $velTimePlt
 	echo "e" >> $velTimePlt
 done
 
@@ -136,7 +141,7 @@ echo "set mxtics" >> $rangeErrTimePlt
 echo "set xlabel 'Time (seconds)'" >> $rangeErrTimePlt
 echo "set ylabel 'Range Error (meters)'" >> $rangeErrTimePlt
 echo "set label \"$simParams\" at graph 0.03, graph 0.03 tc rgb \"black\" font \",4\" front" >> $rangeErrTimePlt
-#echo "set yrange [-10:10]" >> $rangeErrTimePlt
+#echo "set yrange [0:10]" >> $rangeErrTimePlt
 echo "unset key" >> $rangeErrTimePlt
 firstLine="plot "
 if (( vehSampleInt>1 )) 
@@ -151,7 +156,8 @@ then
 	for (( i=1; i<=numVehicles; i++ ))
 	do
 		echo >> $rangeErrTimePlt
-		./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $rangeErrTimeLog >> $rangeErrTimePlt
+		./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $rangeErrTimeLog > $tmpLog 
+		awk 'BEGIN{FS=":"}{print $1,$2}' $tmpLog >> $rangeErrTimePlt
 		echo "e" >> $rangeErrTimePlt
 	done
 else
@@ -165,7 +171,8 @@ else
 	for (( i=1; i<=numVehicles-1; i++ ))
 	do
 		echo >> $rangeErrTimePlt
-		./GroupVehicle.awk lineStart=$i vehCnt=$((numVehicles-1)) $rangeErrTimeLog >> $rangeErrTimePlt
+		./GroupVehicle.awk lineStart=$i vehCnt=$((numVehicles-1)) $rangeErrTimeLog > $tmpLog
+                awk 'BEGIN{FS=":"}{print $1,$2}' $tmpLog >> $rangeErrTimePlt
 		echo "e" >> $rangeErrTimePlt
 	done
 fi

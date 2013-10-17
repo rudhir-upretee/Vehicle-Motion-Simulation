@@ -133,9 +133,14 @@ void CFStats::logRangeError(double time, std::vector<Vehicle> vehList)
 		double desiredGap =
 			vehList.at(vehId+1).getHdwayTime() * vehList.at(vehId+1).getVel();
 
+		//
+		// Log rate error
+		double rateErr = vehList.at(vehId+1).getVel() - vehList.at(vehId).getVel();
+
 		double rangeErr = actualGap - desiredGap;
 		rangeErrTimeLog << time << ":"
-						<< rangeErr
+						<< rangeErr << ":"
+						<< rateErr
 						<< std::endl;
 
 		if(Utils::isGreater(time, m_perturbStartTime))

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cmath>
 #include <Utils.h>
+#include <Config.h>
 #include "CFModelFirstOrdOptCtrl.h"
 
 CFModelFirstOrdOptCtrl::CFModelFirstOrdOptCtrl(
@@ -43,9 +44,6 @@ double CFModelFirstOrdOptCtrl::getAcclrResponse(double time,
 					- (m_xi * acclrVeh);
 
 	// Acceleration in first order systems
-#if 0
-	double acclr = (exp(-time/m_tau) * (m_initAcclr - inputFunc)) + inputFunc;
-#endif
 	double acclr = (exp(-m_updateTime/m_tau) * (acclrVeh - inputFunc)) + inputFunc;
 	return acclr;
 }
@@ -58,37 +56,17 @@ double CFModelFirstOrdOptCtrl::getAcclrResponseInNetwork(double time,
 	double interVehDist = pred.getPosX() -  veh.getPosX();
 	double velDiff = pred.getVel() - veh.getVel();
 
-#if 1
-#if 0
-	double desiredGap =
-			veh.getHdwayTime() * veh.getVel();
-	double rangeErr = interVehDist - desiredGap;
-
-	double deviation = 0.0;
-	if(Utils::isLess(rangeErr,  m_minGap) ||
-		Utils::isEqual(rangeErr,  m_minGap))
-		{
-		deviation = m_minGap - rangeErr;
-		}
-
-	double dynHeadwayTime = m_initHeadwayTime +
-							deviation/velVeh;
-#endif
+#if DYNAMIC_HEADWAY_ADJUST
 	double dynHeadwayTime = m_initHeadwayTime +
 							(interVehDist/velVeh)/m_initHeadwayTime;
 	hdwayTimeUsed = dynHeadwayTime;
-	std::cout << "dynHdway " << dynHeadwayTime << std::endl;
-
-	double inputFunc = (m_alpha * (((interVehDist - m_minGap)/dynHeadwayTime) - velVeh))
-					+ (m_k * velDiff)
-					- (m_xi * acclrVeh);
-
 #else
 	hdwayTimeUsed = m_strStblHeadwayTime;
-	double inputFunc = (m_alpha * (((interVehDist - m_minGap)/m_strStblHeadwayTime) - velVeh))
+#endif
+
+	double inputFunc = (m_alpha * (((interVehDist - m_minGap)/hdwayTimeUsed) - velVeh))
 					+ (m_k * velDiff)
 					- (m_xi * acclrVeh);
-#endif
 
 	// Acceleration in first order systems
 	double acclr = (exp(-m_updateTime/m_tau) * (acclrVeh - inputFunc)) + inputFunc;

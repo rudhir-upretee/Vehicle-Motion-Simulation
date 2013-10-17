@@ -6,6 +6,7 @@
  */
 
 #include <cmath>
+#include <Config.h>
 #include "CFModelOptimalControl.h"
 
 CFModelOptimalControl::CFModelOptimalControl(double k1, double k2,
@@ -38,17 +39,17 @@ double CFModelOptimalControl::getAcclrResponseInNetwork(double time,
 	double velVeh = veh.getVel();
 	double interVehDist = pred.getPosX() -  veh.getPosX();
 	double velDiff = pred.getVel() - veh.getVel();
-#if 0
-	double acclr = m_k1 * (interVehDist - (m_max_headwayTime * velVeh)) +
-					m_k2 * (velDiff);
-	hdwayTimeUsed = m_max_headwayTime;
-#else
+
+#if DYNAMIC_HEADWAY_ADJUST
 	double dynHeadwayTime = m_initHeadwayTime +
 							(m_initHeadwayTime/(interVehDist/velVeh));
 	hdwayTimeUsed = dynHeadwayTime;
-	double acclr = m_k1 * (interVehDist - (dynHeadwayTime * velVeh)) +
-					m_k2 * (velDiff);
+#else
+	hdwayTimeUsed = m_strStblHeadwayTime;
 #endif
+
+	double acclr = m_k1 * (interVehDist - (hdwayTimeUsed * velVeh)) +
+					m_k2 * (velDiff);
 	return acclr;
 }
 

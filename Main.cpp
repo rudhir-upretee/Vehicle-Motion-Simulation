@@ -243,7 +243,7 @@ int main(int argc, char* argv[]) {
 		INITIAL_ACCELERATION = 0.0;
 
 		perturbDuration = 5.0;
-		perturbMagnitude = -4.0;
+		perturbMagnitude = -2.0;
 
 		cfModel = new CFModelFirstOrdOptCtrl(alpha, k, xi, tauTime,
 							updateTime, initHdwayTime, stableHdwayTime,

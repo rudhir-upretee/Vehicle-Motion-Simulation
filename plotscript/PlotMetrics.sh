@@ -19,20 +19,29 @@ cd $plotScriptDir
 maxRngErrPlt="$plotsOutDir/""MaxRngErrScript_""r$reactT""u$updateT""t$tauT.plt"
 minInterVehGapPlt="$plotsOutDir/""MinInterVehGapScript_""r$reactT""u$updateT""t$tauT.plt"
 minTimeToColPlt="$plotsOutDir/""MinTimeToColScript_""r$reactT""u$updateT""t$tauT.plt"
+rangeErrTwoNormPlt="$plotsOutDir/""RangeErrTwoNormScript_""r$reactT""u$updateT""t$tauT.plt"
+rateErrTwoNormPlt="$plotsOutDir/""RateErrTwoNormScript_""r$reactT""u$updateT""t$tauT.plt"
 > $maxRngErrPlt
 > $minInterVehGapPlt
 > $minTimeToColPlt
+> $rangeErrTwoNormPlt
+> $rateErrTwoNormPlt
 
 # Output pdf file names
 maxRngErrPdf="$plotsOutDir/""MaxRngErr_""r$reactT""u$updateT""t$tauT.pdf"
 minInterVehGapPdf="$plotsOutDir/""MinInterVehGap_""r$reactT""u$updateT""t$tauT.pdf"
 minTimeToColPdf="$plotsOutDir/""MinTimeToCol_""r$reactT""u$updateT""t$tauT.pdf"
+rangeErrTwoNormPdf="$plotsOutDir/""RangeErrTwoNorm_""r$reactT""u$updateT""t$tauT.pdf"
+rateErrTwoNormPdf="$plotsOutDir/""RateErrTwoNorm_""r$reactT""u$updateT""t$tauT.pdf"
 
 # Log file names
 maxRngErrLog="/home/rudhir/workspace/CarFollow_Git/Debug/maxRngErr.log"
 minInterVehGapLog="/home/rudhir/workspace/CarFollow_Git/Debug/minInterVehGap.log"
 minTimeToColLog="/home/rudhir/workspace/CarFollow_Git/Debug/minTimeToCol.log"
 paramsLog="/home/rudhir/workspace/CarFollow_Git/Debug/params.log"
+rangeErrTimeLog="/home/rudhir/workspace/CarFollow_Git/Debug/rangeErrTime.log"
+tmpLog="/home/rudhir/workspace/CarFollow_Git/Debug/temp.log"
+> $tmpLog
 
 # Capture simulation params
 simParams="`cat $paramsLog`"
@@ -101,6 +110,86 @@ cat $minTimeToColLog >> $minTimeToColPlt
 echo "e" >> $minTimeToColPlt
 
 ###############################################################################
+# Generate GNUPlot script for rangeErrTwoNorm.pdf
+###############################################################################
+echo "Generating script $rangeErrTwoNormPlt"
+echo "set terminal pdf" >> $rangeErrTwoNormPlt
+echo "set output '$rangeErrTwoNormPdf'" >> $rangeErrTwoNormPlt
+echo "set title 'Range Error'" >> $rangeErrTwoNormPlt
+echo "set grid" >> $rangeErrTwoNormPlt
+echo "set mxtics" >> $rangeErrTwoNormPlt
+#echo "set xtics font \"Times-Roman, 4\"" >> $rangeErrTwoNormPlt
+#echo "set ytics font \"Times-Roman, 4\"" >> $rangeErrTwoNormPlt
+#echo "set xtics 10" >> $rangeErrTwoNormPlt
+echo "set xlabel 'Time (seconds)'" >> $rangeErrTwoNormPlt
+echo "set ylabel '2 Norm Range Error'" >> $rangeErrTwoNormPlt
+echo "set label \"$simParams\" at graph 0.03, graph 0.03 tc rgb \"black\" font \",4\" front" >> $rangeErrTwoNormPlt
+#echo "set yrange [0:10]" >> $rangeErrTwoNormPlt
+echo "unset key" >> $rangeErrTwoNormPlt
+firstLine="plot "
+if (( vehSampleInt>1 )) 
+then
+        echo "plot '-'  with lines" >> $rangeErrTwoNormPlt
+        echo >> $rangeErrTwoNormPlt
+	for (( i=1; i<=numVehicles; i++ ))
+	do
+		./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $rangeErrTimeLog > $tmpLog 
+                awk 'BEGIN{FS=":"}{print $2}' $tmpLog | ./Calc2norm.awk >> $rangeErrTwoNormPlt
+	done		
+        echo "e" >> $rangeErrTwoNormPlt
+
+else
+        echo "plot '-'  with lines" >> $rangeErrTwoNormPlt
+        echo >> $rangeErrTwoNormPlt
+	for (( i=1; i<=numVehicles-1; i++ ))
+	do
+		./GroupVehicle.awk lineStart=$i vehCnt=$((numVehicles-1)) $rangeErrTimeLog > $tmpLog
+                awk 'BEGIN{FS=":"}{print $2}' $tmpLog | ./Calc2norm.awk >> $rangeErrTwoNormPlt
+	done
+        echo "e" >> $rangeErrTwoNormPlt
+fi
+
+###############################################################################
+# Generate GNUPlot script for rateErrTwoNorm.pdf
+###############################################################################
+echo "Generating script $rateErrTwoNormPlt"
+echo "set terminal pdf" >> $rateErrTwoNormPlt
+echo "set output '$rateErrTwoNormPdf'" >> $rateErrTwoNormPlt
+echo "set title 'Rate Error'" >> $rateErrTwoNormPlt
+echo "set grid" >> $rateErrTwoNormPlt
+echo "set mxtics" >> $rateErrTwoNormPlt
+#echo "set xtics font \"Times-Roman, 4\"" >> $rateErrTwoNormPlt
+#echo "set ytics font \"Times-Roman, 4\"" >> $rateErrTwoNormPlt
+#echo "set xtics 10" >> $rateErrTwoNormPlt
+echo "set xlabel 'Time (seconds)'" >> $rateErrTwoNormPlt
+echo "set ylabel '2 Norm Rate Error'" >> $rateErrTwoNormPlt
+echo "set label \"$simParams\" at graph 0.03, graph 0.03 tc rgb \"black\" font \",4\" front" >> $rateErrTwoNormPlt
+#echo "set yrange [0:10]" >> $rateErrTwoNormPlt
+echo "unset key" >> $rateErrTwoNormPlt
+firstLine="plot "
+if (( vehSampleInt>1 )) 
+then
+        echo "plot '-'  with lines" >> $rateErrTwoNormPlt
+        echo >> $rateErrTwoNormPlt
+	for (( i=1; i<=numVehicles; i++ ))
+	do
+		./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $rangeErrTimeLog > $tmpLog 
+                awk 'BEGIN{FS=":"}{print $3}' $tmpLog | ./Calc2norm.awk >> $rateErrTwoNormPlt
+	done		
+        echo "e" >> $rateErrTwoNormPlt
+
+else
+        echo "plot '-'  with lines" >> $rateErrTwoNormPlt
+        echo >> $rateErrTwoNormPlt
+	for (( i=1; i<=numVehicles-1; i++ ))
+	do
+		./GroupVehicle.awk lineStart=$i vehCnt=$((numVehicles-1)) $rangeErrTimeLog > $tmpLog
+                awk 'BEGIN{FS=":"}{print $3}' $tmpLog | ./Calc2norm.awk >> $rateErrTwoNormPlt
+	done
+        echo "e" >> $rateErrTwoNormPlt
+fi
+
+###############################################################################
 # Generate PDF
 ###############################################################################
 echo "Generating Pdf $maxRngErrPdf"
@@ -109,6 +198,10 @@ echo "Generating Pdf $minInterVehGapPdf"
 gnuplot $minInterVehGapPlt
 echo "Generating Pdf $minTimeToColPdf"
 gnuplot $minTimeToColPlt
+echo "Generating Pdf $rangeErrTwoNormPdf"
+gnuplot $rangeErrTwoNormPlt
+echo "Generating Pdf $rateErrTwoNormPdf"
+gnuplot $rateErrTwoNormPlt
 
 # Return to the saved dir path
 #cd $presentDir
