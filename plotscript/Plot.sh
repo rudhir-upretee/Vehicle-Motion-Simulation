@@ -16,24 +16,24 @@ plotScriptDir="/home/rudhir/Research/CarFollow/src/plotscript"
 cd $plotScriptDir
 
 # Output script file names
-distTimePlt="$plotsOutDir/""DistTimeScript_""r$reactT""u$updateT""t$tauT.plt"
 velTimePlt="$plotsOutDir/""VelTimeScript_""r$reactT""u$updateT""t$tauT.plt"
-#acclrVarPlt="$plotsOutDir/""AcclrVarScript_""r$reactT""u$updateT""t$tauT.plt"
+hdwayTimePlt="$plotsOutDir/""HdwayTimeScript_""r$reactT""u$updateT""t$tauT.plt"
+distTimePlt="$plotsOutDir/""DistTimeScript_""r$reactT""u$updateT""t$tauT.plt"
 rangeErrTimePlt="$plotsOutDir/""RangeErrTimeScript_""r$reactT""u$updateT""t$tauT.plt"
-> $distTimePlt
 > $velTimePlt
-#> $acclrVarPlt
+> $hdwayTimePlt
+> $distTimePlt
 > $rangeErrTimePlt
 
 # Output pdf file names
-distTimePdf="$plotsOutDir/""DistTime_""r$reactT""u$updateT""t$tauT.pdf"
 velTimePdf="$plotsOutDir/""VelTime_""r$reactT""u$updateT""t$tauT.pdf"
-#acclrVarPdf="$plotsOutDir/""AcclrVar_""r$reactT""u$updateT""t$tauT.pdf"
+hdwayTimePdf="$plotsOutDir/""HdwayTimePdf_""r$reactT""u$updateT""t$tauT.pdf"
+distTimePdf="$plotsOutDir/""DistTime_""r$reactT""u$updateT""t$tauT.pdf"
 rangeErrTimePdf="$plotsOutDir/""RangeErrTime_""r$reactT""u$updateT""t$tauT.pdf"
 
 # Log file names
-distTimeLog="/home/rudhir/workspace/CarFollow_Git/Debug/distTime.log"
 velTimeLog="/home/rudhir/workspace/CarFollow_Git/Debug/velTime.log" 
+distTimeLog="/home/rudhir/workspace/CarFollow_Git/Debug/distTime.log"
 paramsLog="/home/rudhir/workspace/CarFollow_Git/Debug/params.log"
 rangeErrTimeLog="/home/rudhir/workspace/CarFollow_Git/Debug/rangeErrTime.log"
 tmpLog="/home/rudhir/workspace/CarFollow_Git/Debug/temp.log"
@@ -41,6 +41,72 @@ tmpLog="/home/rudhir/workspace/CarFollow_Git/Debug/temp.log"
 
 # Capture simulation params
 simParams="`cat $paramsLog`"
+
+###############################################################################
+## Generate GNUPlot script for VelTime.pdf
+###############################################################################
+echo "Generating script $velTimePlt"
+echo "set terminal pdf" >> $velTimePlt
+echo "set output '$velTimePdf'" >> $velTimePlt
+echo "set title 'Velocity Profile'" >> $velTimePlt
+echo "set grid" >> $velTimePlt
+echo "set mxtics" >> $velTimePlt
+#echo "set xtics font \"Times-Roman, 4\"" >> $velTimePlt
+#echo "set ytics font \"Times-Roman, 4\"" >> $velTimePlt
+#echo "set xtics 10" >> $velTimePlt
+echo "set xlabel 'Time (seconds)'" >> $velTimePlt
+echo "set ylabel 'Velocity (meters/sec)'" >> $velTimePlt
+echo "set label \"$simParams\" at 1.5,38.0 tc rgb \"black\" font \",4\" front" >> $velTimePlt
+#echo "set yrange [-10:80]" >> $velTimePlt
+echo "unset key" >> $velTimePlt
+firstLine="plot "
+for (( i=0; i<numVehicles-1; i++ ))
+do
+	echo "$firstLine'-'  with lines,\\" >> $velTimePlt
+	firstLine=""
+done
+echo "'-'  with lines" >> $velTimePlt
+
+for (( i=1; i<=numVehicles; i++ ))
+do
+	echo >> $velTimePlt
+	./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $velTimeLog > $tmpLog 
+	awk 'BEGIN{FS=":"}{print $1,$2}' $tmpLog >> $velTimePlt
+	echo "e" >> $velTimePlt
+done
+
+###############################################################################
+## Generate GNUPlot script for HdwayTime.pdf
+###############################################################################
+echo "Generating script $hdwayTimePlt"
+echo "set terminal pdf" >> $hdwayTimePlt
+echo "set output '$hdwayTimePdf'" >> $hdwayTimePlt
+echo "set title 'Headway Time Profile'" >> $hdwayTimePlt
+echo "set grid" >> $hdwayTimePlt
+echo "set mxtics" >> $hdwayTimePlt
+#echo "set xtics font \"Times-Roman, 4\"" >> $hdwayTimePlt
+#echo "set ytics font \"Times-Roman, 4\"" >> $hdwayTimePlt
+#echo "set xtics 10" >> $hdwayTimePlt
+echo "set xlabel 'Time (seconds)'" >> $hdwayTimePlt
+echo "set ylabel 'Head Way Time (seconds)'" >> $hdwayTimePlt
+echo "set label \"$simParams\" at 1.5,38.0 tc rgb \"black\" font \",4\" front" >> $hdwayTimePlt
+#echo "set yrange [-10:80]" >> $hdwayTimePlt
+echo "unset key" >> $hdwayTimePlt
+firstLine="plot "
+for (( i=0; i<numVehicles-1; i++ ))
+do
+	echo "$firstLine'-'  with lines,\\" >> $hdwayTimePlt
+	firstLine=""
+done
+echo "'-'  with lines" >> $hdwayTimePlt
+
+for (( i=1; i<=numVehicles; i++ ))
+do
+	echo >> $hdwayTimePlt
+	./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $velTimeLog > $tmpLog 
+	awk 'BEGIN{FS=":"}{print $1,$5}' $tmpLog >> $hdwayTimePlt
+	echo "e" >> $hdwayTimePlt
+done
 
 ###############################################################################
 ## Generate GNUPlot script for DistTime.pdf
@@ -92,39 +158,6 @@ else
 		echo "e" >> $distTimePlt
 	done
 fi
-
-###############################################################################
-## Generate GNUPlot script for VelTime.pdf
-###############################################################################
-echo "Generating script $velTimePlt"
-echo "set terminal pdf" >> $velTimePlt
-echo "set output '$velTimePdf'" >> $velTimePlt
-echo "set title 'Velocity Profile'" >> $velTimePlt
-echo "set grid" >> $velTimePlt
-echo "set mxtics" >> $velTimePlt
-#echo "set xtics font \"Times-Roman, 4\"" >> $velTimePlt
-#echo "set ytics font \"Times-Roman, 4\"" >> $velTimePlt
-#echo "set xtics 10" >> $velTimePlt
-echo "set xlabel 'Time (seconds)'" >> $velTimePlt
-echo "set ylabel 'Velocity (meters/sec)'" >> $velTimePlt
-echo "set label \"$simParams\" at 1.5,38.0 tc rgb \"black\" font \",4\" front" >> $velTimePlt
-#echo "set yrange [-10:80]" >> $velTimePlt
-echo "unset key" >> $velTimePlt
-firstLine="plot "
-for (( i=0; i<numVehicles-1; i++ ))
-do
-	echo "$firstLine'-'  with lines,\\" >> $velTimePlt
-	firstLine=""
-done
-echo "'-'  with lines" >> $velTimePlt
-
-for (( i=1; i<=numVehicles; i++ ))
-do
-	echo >> $velTimePlt
-	./GroupVehicle.awk lineStart=$i vehCnt=$numVehicles $velTimeLog > $tmpLog 
-	awk 'BEGIN{FS=":"}{print $1,$2}' $tmpLog >> $velTimePlt
-	echo "e" >> $velTimePlt
-done
 
 ###############################################################################
 # Generate GNUPlot script for RangeErrTime.pdf
@@ -180,12 +213,12 @@ fi
 ###############################################################################
 # Generate PDF
 ###############################################################################
-echo "Generating Pdf $distTimePdf"
-gnuplot $distTimePlt
 echo "Generating Pdf $velTimePdf"
 gnuplot $velTimePlt
-#echo "Generating Pdf $acclrVarPdf"
-#gnuplot $acclrVarPlt
+echo "Generating Pdf $hdwayTimePdf"
+gnuplot $hdwayTimePlt
+echo "Generating Pdf $distTimePdf"
+gnuplot $distTimePlt
 echo "Generating Pdf $rangeErrTimePdf"
 gnuplot $rangeErrTimePlt
 

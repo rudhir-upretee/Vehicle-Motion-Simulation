@@ -17,6 +17,8 @@ char connPatCnt_doc1[MAX_LINE_CHARS];
 char connPatCnt_doc2[MAX_LINE_CHARS];
 char statCnt_doc1[MAX_LINE_CHARS];
 char statCnt_doc2[MAX_LINE_CHARS];
+char adjHdwayTime_doc1[MAX_LINE_CHARS];
+char adjHdwayTime_doc2[MAX_LINE_CHARS];
 
 void createOptDocs(void);
 
@@ -57,9 +59,11 @@ static struct argp_option options[] = {
 		{ "nwDelta-time", 'd', "DOUBLE", 0, "Network propagation delay in seconds" },
 		{ 0, 0, 0, 0, "", 11},
 		{ "init-hdway-time", 'w', "DOUBLE", 0, "Initial headway time in seconds" },
-		{ 0, 0, 0, 0, "", 12},
-		{ "stable-hdway-time", 'x', "DOUBLE", 0, "String stable headway time in seconds" },
-		{ 0, 0, 0, 0, "", 13},
+		{ 0, 0, 0, 0, "", 14},
+		{ "adj-hdway-time", 'x', "INT", 0, "Adjust headway time" },
+		{ "adj-hdway-time", 'x', xstr(INCR_HDWAY), 0, adjHdwayTime_doc1 },
+		{ "adj-hdway-time", 'x', xstr(DECR_HDWAY), 0, adjHdwayTime_doc2 },
+		{ 0, 0, 0, 0, "", 15},
 		{ "perturb-start-time", 'p', "DOUBLE", 0, "Perturbation start time of leader in seconds" },
 		{ 0 } };
 
@@ -105,7 +109,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 		arguments->initHdwayTime = arg;
 		break;
 	case 'x':
-		arguments->stableHdwayTime = arg;
+		arguments->adjHdwayTime = arg;
 		break;
 	case 'p':
 		arguments->perturbStartTime = arg;
@@ -166,7 +170,7 @@ void argParse(int argc, char **argv, Arguments* arguments) {
 	arguments->updateTime = "0.1";
 	arguments->nwDeltaTime = "0.1";
 	arguments->initHdwayTime = "1.0";
-	arguments->stableHdwayTime = "1.5";
+	arguments->adjHdwayTime = "1";
 	arguments->perturbStartTime = "10.0";
 
 	/* Where the magic happens */
@@ -178,7 +182,7 @@ void argParse(int argc, char **argv, Arguments* arguments) {
 	printf("model = %s\nveh-cnt = %s\nsim-time = %s\n"
 			"conn-pat = %s\npat-cnt = %s\nstat-cnt = %s\n"
 			"react-time = %s\ntau-time = %s\nupdate-time = %s\n"
-			"nwDelta-time = %s\ninit-hdway-time = %s\nstable-hdway-time = %s\n"
+			"nwDelta-time = %s\ninit-hdway-time = %s\nadj-hdway-time = %s\n"
 			"perturb-start-time = %s\n",
 			arguments->model,
 			arguments->vehCnt,
@@ -191,7 +195,7 @@ void argParse(int argc, char **argv, Arguments* arguments) {
 			arguments->updateTime,
 			arguments->nwDeltaTime,
 			arguments->initHdwayTime,
-			arguments->stableHdwayTime,
+			arguments->adjHdwayTime,
 			arguments->perturbStartTime);
 	printf("ARG1 = %s\n\n", arguments->args[0]);
 #endif
@@ -210,8 +214,11 @@ void createOptDocs(void){
 	strcpy(connPatCnt_doc1, "-n 100 -c 1 -o NUM means first NUM vehicles IN and remaining n-NUM OUT");
 	strcpy(connPatCnt_doc2, "-n 100 -c 2 -o NUM means first NUM vehicles OUT and remaining n-NUM IN");
 
-	strcpy(statCnt_doc1, "-s 1  means take statistics of all the vehicles");
-	strcpy(statCnt_doc2, "-s N  means take statistics of every Nth vehicle");
+	strcpy(statCnt_doc1, "1  means take statistics of all the vehicles");
+	strcpy(statCnt_doc2, "N  means take statistics of every Nth vehicle");
+
+	strcpy(adjHdwayTime_doc1, "Increase the headway time");
+	strcpy(adjHdwayTime_doc2, "Decrease the headway time");
 
 }
 

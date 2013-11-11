@@ -18,7 +18,7 @@ CFModelSimple::~CFModelSimple() {
 
 }
 
-double CFModelSimple::getAcclrResponse(double time, Vehicle& veh, Vehicle pred,
+double CFModelSimple::getAcclrResp(double time, Vehicle& veh, Vehicle pred,
 										double& hdwayTimeUsed) {
 	double velVeh = veh.getVel();
 	double velPred = pred.getVel();
@@ -32,7 +32,13 @@ double CFModelSimple::getAcclrResponse(double time, Vehicle& veh, Vehicle pred,
 	return acclr;
 }
 
-double CFModelSimple::getAcclrResponseInNetwork(double time, Vehicle& veh,
+double CFModelSimple::getAcclrRespInNetSafe(double time, Vehicle& veh,
+												Vehicle pred, double& hdwayTimeUsed) {
+	hdwayTimeUsed = 0.0;
+	return 0.0;
+}
+
+double CFModelSimple::getAcclrRespInNetResume(double time, Vehicle& veh,
 												Vehicle pred, double& hdwayTimeUsed) {
 	hdwayTimeUsed = 0.0;
 	return 0.0;
@@ -42,7 +48,7 @@ double CFModelSimple::getInitialHeadwayTime() {
 	return 0.0;
 }
 
-double CFModelSimple::getStringStableHeadwayTime() {
+double CFModelSimple::getMinStableHeadwayTime() {
 	return 0.0;
 }
 

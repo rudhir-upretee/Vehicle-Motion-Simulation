@@ -127,12 +127,10 @@ int main(int argc, char* argv[]) {
 		return -1;
 		}
 
-	double stableHdwayTime = atof(arguments.stableHdwayTime);
-	//if(Utils::isLess(stableHdwayTime, 0.0) || Utils::isEqual(stableHdwayTime, 0.0)
-	//	|| (Utils::isLess(stableHdwayTime, initHdwayTime)))
-	if(Utils::isLess(stableHdwayTime, 0.0) || Utils::isEqual(stableHdwayTime, 0.0))
+	double adjHdwayTime = atoi(arguments.adjHdwayTime);
+	if((adjHdwayTime < HDWAY_SAFE) || (adjHdwayTime > HDWAY_RESUME))
 		{
-		cout << "ERROR: Invalid argument to stable-hdway-time" << endl;
+		cout << "ERROR: Invalid argument to adj-hdway-time" << endl;
 		printUsage(argv[0]);
 		return -1;
 		}
@@ -156,7 +154,7 @@ int main(int argc, char* argv[]) {
 			<< "updateTime = " << updateTime << endl
 			<< "nwDeltaTime = " << nwDeltaTime << endl
 			<< "initHdwayTime = " << initHdwayTime << endl
-			<< "stableHdwayTime = " << stableHdwayTime << endl
+			<< "adjHdwayTime = " << adjHdwayTime << endl
 			<< "perturbStartTime = " << perturbStartTime << endl;
 
 	// Sanity check
@@ -180,7 +178,7 @@ int main(int argc, char* argv[]) {
 			updateTime,
 			nwDeltaTime,
 			initHdwayTime,
-			stableHdwayTime,
+			adjHdwayTime,
 			perturbStartTime,
 			4.0);
 
@@ -201,7 +199,14 @@ int main(int argc, char* argv[]) {
 		INITIAL_ACCELERATION = 0.0;
 
 		perturbDuration = 5.0;
-		perturbMagnitude = -2.0;
+		if(adjHdwayTime == HDWAY_SAFE)
+			{
+			perturbMagnitude = -2.0;
+			}
+		else
+			{
+			perturbMagnitude = 0.0;
+			}
 
 		cfModel = new CFModelSimple(lamda, m, l);
 
@@ -213,6 +218,13 @@ int main(int argc, char* argv[]) {
 	else if(model == OCM)
 		{
 		double k1 = 0.1, k2 = 0.5;
+		int minStableHdwayTime = 1.0;
+		if(Utils::isLess(initHdwayTime, minStableHdwayTime))
+			{
+			cout << "ERROR: init-hdway-time is less than minStableHdwayTime" << endl;
+			printUsage(argv[0]);
+			return -1;
+			}
 
 		// Works with hdway=1.25 and stableHdway=2.0
 		INITIAL_INTERVEH_DIST = 37.5;
@@ -220,21 +232,36 @@ int main(int argc, char* argv[]) {
 		INITIAL_ACCELERATION = 0.0;
 
 		perturbDuration = 5.0;
-		perturbMagnitude = -4.0;
+		if(adjHdwayTime == HDWAY_SAFE)
+			{
+			perturbMagnitude = -2.0;
+			}
+		else
+			{
+			perturbMagnitude = 0.0;
+			}
 
 		cfModel = new CFModelOptimalControl(k1, k2,
-											initHdwayTime, stableHdwayTime);
+											initHdwayTime, minStableHdwayTime);
 
 		paramsLogStr << " k1=" << k1
 				<< " k2=" << k2
 				<< " hdwayT=" << initHdwayTime
-				<< " stblHdwayT=" << stableHdwayTime;
+				<< " minStblHdwayT=" << minStableHdwayTime;
 		cfStats.logParams(paramsLogStr);
 		}
 	else if(model == FOOCM)
 		{
 		double alpha = 2, k = 1, xi = 0.6;
 		double minGap = 4.0;
+		double minStableHdwayTime = 2.0;
+		if(Utils::isLess(initHdwayTime, minStableHdwayTime))
+			{
+			cout << "ERROR: init-hdway-time is less than minStableHdwayTime" << endl;
+			printUsage(argv[0]);
+			return -1;
+			}
+
 		cfStats.setMinGap(minGap);
 
 		// Works best tau = 0.2, updT = 0.1, reactT = 0.3, nwDlyT = 0.1
@@ -243,10 +270,17 @@ int main(int argc, char* argv[]) {
 		INITIAL_ACCELERATION = 0.0;
 
 		perturbDuration = 5.0;
-		perturbMagnitude = -2.0;
+		if(adjHdwayTime == HDWAY_SAFE)
+			{
+			perturbMagnitude = -2.0;
+			}
+		else
+			{
+			perturbMagnitude = 0.0;
+			}
 
 		cfModel = new CFModelFirstOrdOptCtrl(alpha, k, xi, tauTime,
-							updateTime, initHdwayTime, stableHdwayTime,
+							updateTime, initHdwayTime, minStableHdwayTime,
 							minGap, INITIAL_ACCELERATION);
 
 		paramsLogStr << " TauT=" << tauTime
@@ -255,23 +289,38 @@ int main(int argc, char* argv[]) {
 				<< " xi=" << xi
 				<< " minGap=" << minGap
 				<< " hdwayT=" << initHdwayTime
-				<< " sHdwayT=" << stableHdwayTime;
+				<< " minStblHdwayT=" << minStableHdwayTime;
 		cfStats.logParams(paramsLogStr);
 		}
 	else if(model == IDM)
 		{
-		double desVel = 30.0, minGap = 2.0, maxAcclr = 1.0, desDecelr = 3.0;
+		double desVel = 30.0, minGap = 4.0, maxAcclr = 1.0, desDecelr = 3.0;
+		double minStableHdwayTime = 2.0;
+		if(Utils::isLess(initHdwayTime, minStableHdwayTime))
+			{
+			cout << "ERROR: init-hdway-time is less than minStableHdwayTime" << endl;
+			printUsage(argv[0]);
+			return -1;
+			}
+
 		cfStats.setMinGap(minGap);
 
 		// Works with hdway=1.25 and stableHdway=2.0
-		INITIAL_INTERVEH_DIST = 34.0;
 		INITIAL_VELOCITY = 30.0;
+		INITIAL_INTERVEH_DIST = INITIAL_VELOCITY * initHdwayTime + minGap;
 		INITIAL_ACCELERATION = 0.0;
 
 		perturbDuration = 5.0;
-		perturbMagnitude = -4.0;
+		if(adjHdwayTime == HDWAY_SAFE)
+			{
+			perturbMagnitude = -2.0;
+			}
+		else
+			{
+			perturbMagnitude = 0.0;
+			}
 
-		cfModel = new CFModelIDM(desVel, initHdwayTime, stableHdwayTime,
+		cfModel = new CFModelIDM(desVel, initHdwayTime, minStableHdwayTime,
 								minGap, maxAcclr, desDecelr);
 
 		paramsLogStr << " desVel=" << desVel
@@ -286,7 +335,7 @@ int main(int argc, char* argv[]) {
 
 	CFAPI cfApi(cfModel, updateTime, reactTime, nwDeltaTime,
 				INITIAL_INTERVEH_DIST, INITIAL_VELOCITY, INITIAL_ACCELERATION,
-				initHdwayTime);
+				initHdwayTime, adjHdwayTime);
 
 	cfApi.initVehicles(vehList, vehCnt, connPat, patCnt,
 			perturbStartTime, perturbDuration, perturbMagnitude);

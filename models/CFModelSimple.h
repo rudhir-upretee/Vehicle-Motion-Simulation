@@ -16,10 +16,11 @@ public:
 	CFModelSimple(double lamda, double m, double l);
 	virtual ~CFModelSimple();
 
-	double getAcclrResponse(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
-	double getAcclrResponseInNetwork(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
+	double getAcclrResp(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
+	double getAcclrRespInNetSafe(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
+	double getAcclrRespInNetResume(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
 	double getInitialHeadwayTime();
-	double getStringStableHeadwayTime();
+	double getMinStableHeadwayTime();
 
 private:
 

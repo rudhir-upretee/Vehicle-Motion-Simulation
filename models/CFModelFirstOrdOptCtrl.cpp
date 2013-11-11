@@ -12,7 +12,7 @@
 
 CFModelFirstOrdOptCtrl::CFModelFirstOrdOptCtrl(
 		double alpha, double k, double xi, double tau,
-		double updateTime, double initHeadwayTime, double strStblHeadwayTime,
+		double updateTime, double initHeadwayTime, double minStblHeadwayTime,
 		double minGap, double initAcclr) {
 
 	m_alpha = alpha;
@@ -21,7 +21,7 @@ CFModelFirstOrdOptCtrl::CFModelFirstOrdOptCtrl(
 	m_tau = tau;
 	m_updateTime = updateTime;
 	m_initHeadwayTime = initHeadwayTime;
-	m_strStblHeadwayTime = strStblHeadwayTime;
+	m_minStblHeadwayTime = minStblHeadwayTime;
 	m_minGap = minGap;
 	m_initAcclr = initAcclr;
 }
@@ -30,7 +30,7 @@ CFModelFirstOrdOptCtrl::~CFModelFirstOrdOptCtrl() {
 
 }
 
-double CFModelFirstOrdOptCtrl::getAcclrResponse(double time,
+double CFModelFirstOrdOptCtrl::getAcclrResp(double time,
 												Vehicle& veh, Vehicle pred,
 												double& hdwayTimeUsed) {
 	double acclrVeh = veh.getAcclr();
@@ -48,7 +48,7 @@ double CFModelFirstOrdOptCtrl::getAcclrResponse(double time,
 	return acclr;
 }
 
-double CFModelFirstOrdOptCtrl::getAcclrResponseInNetwork(double time,
+double CFModelFirstOrdOptCtrl::getAcclrRespInNetSafe(double time,
 												Vehicle& veh, Vehicle pred,
 												double& hdwayTimeUsed) {
 	double acclrVeh = veh.getAcclr();
@@ -56,13 +56,34 @@ double CFModelFirstOrdOptCtrl::getAcclrResponseInNetwork(double time,
 	double interVehDist = pred.getPosX() -  veh.getPosX();
 	double velDiff = pred.getVel() - veh.getVel();
 
-#if DYNAMIC_HEADWAY_ADJUST
 	double dynHeadwayTime = m_initHeadwayTime +
 							(interVehDist/velVeh)/m_initHeadwayTime;
 	hdwayTimeUsed = dynHeadwayTime;
-#else
-	hdwayTimeUsed = m_strStblHeadwayTime;
-#endif
+
+	double inputFunc = (m_alpha * (((interVehDist - m_minGap)/hdwayTimeUsed) - velVeh))
+					+ (m_k * velDiff)
+					- (m_xi * acclrVeh);
+
+	// Acceleration in first order systems
+	double acclr = (exp(-m_updateTime/m_tau) * (acclrVeh - inputFunc)) + inputFunc;
+	return acclr;
+}
+
+double CFModelFirstOrdOptCtrl::getAcclrRespInNetResume(double time,
+												Vehicle& veh, Vehicle pred,
+												double& hdwayTimeUsed) {
+	double acclrVeh = veh.getAcclr();
+	double velVeh = veh.getVel();
+	double interVehDist = pred.getPosX() -  veh.getPosX();
+	double velDiff = pred.getVel() - veh.getVel();
+
+	//double dynHeadwayTime = std::max(m_minStblHeadwayTime,
+	//		m_initHeadwayTime -(interVehDist/velVeh)/m_minStblHeadwayTime);
+	//double dynHeadwayTime = std::max(m_minStblHeadwayTime,
+			//exp(-((interVehDist/velVeh)/m_minStblHeadwayTime)/25.0));
+	double dynHeadwayTime = std::max(m_minStblHeadwayTime,
+			m_minStblHeadwayTime+0.8*((interVehDist/velVeh)/m_minStblHeadwayTime));
+	hdwayTimeUsed = dynHeadwayTime;
 
 	double inputFunc = (m_alpha * (((interVehDist - m_minGap)/hdwayTimeUsed) - velVeh))
 					+ (m_k * velDiff)
@@ -77,7 +98,7 @@ double CFModelFirstOrdOptCtrl::getInitialHeadwayTime() {
 	return m_initHeadwayTime;
 }
 
-double CFModelFirstOrdOptCtrl::getStringStableHeadwayTime() {
-	return m_strStblHeadwayTime;
+double CFModelFirstOrdOptCtrl::getMinStableHeadwayTime() {
+	return m_minStblHeadwayTime;
 }
 

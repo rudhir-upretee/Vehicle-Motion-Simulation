@@ -29,7 +29,7 @@ public:
 			double updateTime,
 			double nwDeltaTime,
 			double initHdwayTime,
-			double stableHdwayTime,
+			double adjHdwayTime,
 			double perturbStartTime,
 			double minGap);
 	virtual ~CFStats();
@@ -58,7 +58,7 @@ private:
 	double m_updateTime;
 	double m_nwDeltaTime;
 	double m_initHdwayTime;
-	double m_stableHdwayTime;
+	double m_adjHdwayTime;
 	double m_perturbStartTime;
 	double m_minGap;
 

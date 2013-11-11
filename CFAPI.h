@@ -13,12 +13,13 @@
 #include <map>
 #include <Vehicle.h>
 #include <CFModel.h>
+#include <ArgParse.h>
 
 class CFAPI {
 public:
 	CFAPI(CFModel* cfModel, double updateTime, double reactTime, double delta,
 			double initVehGap, double initVel, double initAcclr,
-			double initHdway);
+			double initHdway, int adjHdwayTime);
 	virtual ~CFAPI();
 
 	void initVehicles(std::vector<Vehicle>& vehList, int maxVehicles,
@@ -34,8 +35,10 @@ public:
 private:
 	double ACCLR_LIMIT;
 	double DECCLR_LIMIT;
-	static const int ON_FOLLOW_OFF = 1;
-	static const int OFF_FOLLOW_ON = 2;
+//	static const int ON_FOLLOW_OFF = 1;
+//	static const int OFF_FOLLOW_ON = 2;
+//	static const int HDWAY_SAFETY = 1;
+//	static const int HDWAY_RESUME = 2;
 
     double m_updateTime;
     double m_reactTime;
@@ -44,6 +47,7 @@ private:
     double m_initVel;
     double m_initAcclr;
     double m_initHdway;
+    int m_adjHdwayTime;
     int m_factor;
 
     double m_leaderCtrlStart;

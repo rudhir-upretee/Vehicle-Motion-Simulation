@@ -14,22 +14,24 @@
 
 class CFModelIDM: public CFModel {
 public:
-	CFModelIDM(double desVel, double initHeadwayTime, double strStblHeadwayTime,
+	CFModelIDM(double desVel, double initHeadwayTime, double minStblHeadwayTime,
 				double minGap, double maxAcclr, double desDecelr);
 	virtual ~CFModelIDM();
 
-	double getAcclrResponse(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
-	double getAcclrResponseInNetwork(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
+	double getAcclrResp(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
+	double getAcclrRespInNetSafe(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
+	double getAcclrRespInNetResume(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
 	double getInitialHeadwayTime();
-	double getStringStableHeadwayTime();
+	double getMinStableHeadwayTime();
 
 private:
 	double m_desired_velocity;
 	double m_initHeadwayTime;
-	double m_strStblHeadwayTime;
+	double m_minStblHeadwayTime;
 	double m_min_gap;
 	double m_max_acclr;
 	double m_desired_decelr;
+
 };
 
 #endif /* CFMODELIDM_H_ */

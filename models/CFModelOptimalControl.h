@@ -14,20 +14,21 @@
 class CFModelOptimalControl: public CFModel {
 public:
 	CFModelOptimalControl(double k1, double k2,
-					double initHeadwayTime, double strStblHeadwayTime);
+					double initHeadwayTime, double minStblHeadwayTime);
 	virtual ~CFModelOptimalControl();
 
-	double getAcclrResponse(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
-	double getAcclrResponseInNetwork(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
+	double getAcclrResp(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
+	double getAcclrRespInNetSafe(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
+	double getAcclrRespInNetResume(double time, Vehicle& veh, Vehicle pred, double& hdwayTimeUsed);
 	double getInitialHeadwayTime();
-	double getStringStableHeadwayTime();
+	double getMinStableHeadwayTime();
 
 private:
 
 	double m_k1;
 	double m_k2;
 	double m_initHeadwayTime;
-	double m_strStblHeadwayTime;
+	double m_minStblHeadwayTime;
 };
 
 #endif /* CFMODELOPTIMALCONTROL_H_ */

@@ -22,7 +22,7 @@ CFStats::CFStats(int model,
 		double updateTime,
 		double nwDeltaTime,
 		double initHdwayTime,
-		double stableHdwayTime,
+		double adjHdwayTime,
 		double perturbStartTime,
 		double minGap)
 	{
@@ -37,7 +37,7 @@ CFStats::CFStats(int model,
 	m_updateTime = updateTime;
 	m_nwDeltaTime = nwDeltaTime;
 	m_initHdwayTime = initHdwayTime;
-	m_stableHdwayTime = stableHdwayTime;
+	m_adjHdwayTime = adjHdwayTime;
 	m_perturbStartTime = perturbStartTime;
 	m_minGap = minGap;
 
@@ -129,12 +129,12 @@ void CFStats::logRangeError(double time, std::vector<Vehicle> vehList)
 				    << std::endl;
 
 		//
-		// Log range error
+		// Find range error
 		double desiredGap =
 			vehList.at(vehId+1).getHdwayTime() * vehList.at(vehId+1).getVel();
 
 		//
-		// Log rate error
+		// Find rate error
 		double rateErr = vehList.at(vehId+1).getVel() - vehList.at(vehId).getVel();
 
 		double rangeErr = actualGap - desiredGap;
@@ -179,7 +179,8 @@ void CFStats::logCarVelocity(double time, std::vector<Vehicle> vehList)
 		velTimeLog << time << ":"
 				   << vehList.at(vehId).getVel() << ":"
 				   << vehList.at(vehId).getPosX()  << ":"
-				   << vehList.at(vehId).getAcclr()
+				   << vehList.at(vehId).getAcclr() << ":"
+				   << vehList.at(vehId).getHdwayTime()
 				   << std::endl;
 		}
 	}

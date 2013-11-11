@@ -13,7 +13,7 @@
 
 CFAPI::CFAPI(CFModel* cfModel, double updateTime, double reactTime, double delta,
 			double initVehGap, double initVel, double initAcclr,
-			double initHdway):
+			double initHdway, int adjHdwayTime):
 			m_leaderCtrlStart(4.0),
 			m_leaderCtrlDuration (5.0),
 			m_leaderCtrlDecelr(-4.0) {
@@ -26,6 +26,7 @@ CFAPI::CFAPI(CFModel* cfModel, double updateTime, double reactTime, double delta
     m_initVel = initVel;
 	m_initAcclr = initAcclr;
 	m_initHdway = initHdway;
+	m_adjHdwayTime = adjHdwayTime;
 
 	ACCLR_LIMIT = 4.0;
 	DECCLR_LIMIT = -9.0;
@@ -258,21 +259,24 @@ void CFAPI::updateFollowerAcclr(int step, double time, Vehicle& veh, Vehicle pre
 	double newAcclr = 0.0;
 	double newHdwayTime = 0.0;
 
-	// The impact of VANET network messages are seen only on vehicles
-	// with safety device enabled.
 	if((veh.hasSafetyDev()) &&
 		(time >= veh.getSafetyDevStartTime()))
 		{
-		newAcclr = m_cfModel->getAcclrResponseInNetwork(time, veh, predVeh, newHdwayTime);
-		//hdwayTimeUsed = m_cfModel->getStringStableHeadwayTime();
+		if(m_adjHdwayTime == HDWAY_SAFE)
+		    {
+			newAcclr = m_cfModel->getAcclrRespInNetSafe(time, veh, predVeh, newHdwayTime);
+		    }
+		else
+			{
+			newAcclr = m_cfModel->getAcclrRespInNetResume(time, veh, predVeh, newHdwayTime);
+			}
 
 		std::cout << "Recv safety message: Veh: " << veh.getId()
 					<< " at time " << time << std::endl;
 		}
 	else
 		{
-		newAcclr = m_cfModel->getAcclrResponse(time, veh, predVeh, newHdwayTime);
-		//hdwayTimeUsed = m_cfModel->getInitialHeadwayTime();
+		newAcclr = m_cfModel->getAcclrResp(time, veh, predVeh, newHdwayTime);
 		}
 
 	// Adjust for unrealistic acclr and decclr values

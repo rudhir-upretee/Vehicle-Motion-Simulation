@@ -1,3 +1,6 @@
+#ifndef ARGPARSE_H_
+#define ARGPARSE_H_
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,6 +15,8 @@ extern "C" {
 #define IDM             4 //IDM_MODEL
 #define ON_FOLLOW_OFF   1
 #define OFF_FOLLOW_ON   2
+#define HDWAY_SAFE      1
+#define HDWAY_RESUME    2
 
 /* This structure is used by main to communicate with parse_opt. */
 typedef struct Arguments {
@@ -26,7 +31,7 @@ typedef struct Arguments {
 	char* updateTime;
 	char* nwDeltaTime;
 	char* initHdwayTime;
-	char* stableHdwayTime;
+	char* adjHdwayTime;
 	char* perturbStartTime;
 	char *args[1]; /* ARG1 */
 
@@ -39,3 +44,5 @@ void argParse(int argc, char **argv, Arguments* arguments);
 #ifdef __cplusplus
 }
 #endif
+
+#endif //ARGPARSE_H_
